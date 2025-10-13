@@ -54,7 +54,7 @@ private:
      * @param end - ending city
      * @return a vector containing the cheapest 3 paths
      */
-    DSVector<Plan> cheapestFlightPaths(const DSString start, const DSString end);
+    DSVector<Plan> cheapestFlightPaths(const DSString start, const DSString end, DSDoublyLL<DSString> visited = {});
 
     /**
      * @brief fastestFlightPaths - returns the fastest 3 flight paths between the given cities
@@ -62,7 +62,7 @@ private:
      * @param end - ending city
      * @return a vector containing the fastest 3 paths
      */
-    DSVector<Plan> fastestFlightPaths(const DSString start, const DSString end);
+    DSVector<Plan> fastestFlightPaths(const DSString start, const DSString end, DSDoublyLL<DSString> visited = {});
 
     /**
      * @brief writeToFile - outputs the given flight paths to the given file

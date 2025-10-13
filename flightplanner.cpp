@@ -115,7 +115,7 @@ void FlightPlanner::planFlights(const DSString plansPath, const DSString outputP
  * @param end - ending city
  * @return a vector containing the cheapest 3 paths
  */
-DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString start, const DSString end)
+DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString start, const DSString end, DSDoublyLL<DSString> visited)
 {
     // try all paths between start and end and output a list of the top 3 cheapest fligts
 
@@ -130,11 +130,38 @@ DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString 
  * @param end - ending city
  * @return a vector containing the fastest 3 paths
  */
-DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString start, const DSString end)
+DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString start, const DSString end, DSDoublyLL<DSString> visited)
 {
+    visited.pushBack(start);
     // try all paths between start and end and output a list of the top 3 fastest fligts
 
-    std::cout << "Finding fastest paths between " << start << " and " << end << std::endl;
+    DSDoublyLL<DSString> nodes = flights.GetConnectedNodes(start);
+
+    /*std::cout << "Finding fastest paths between " << start << " and " << end << std::endl;
+    std::cout << "current path: ";
+    for(DSString city : visited){
+        std::cout << city << ", ";
+    }
+    std::cout << std::endl;std::cout << "connections: ";
+    for(DSString node : nodes){
+        std::cout << node << ", ";
+    }
+    std::cout << std::endl;*/
+
+    for(DSString& node : nodes){
+        if(visited.contains(node)){
+            continue;
+        }
+        if(node == end){
+            std::cout << "found path from " << visited[0] << " to " << node << "!" << std::endl;
+            for(DSString& city : visited){
+                std::cout << city << ", ";
+            }
+            std::cout << node << std::endl;
+        } else {
+            fastestFlightPaths(node, end, visited);
+        }
+    }
 
     return DSVector<Plan>();
 }
