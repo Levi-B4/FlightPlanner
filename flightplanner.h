@@ -16,7 +16,7 @@ public:
     };
 
     struct Plan{
-        DSVector<City> path;
+        DSVector<DSString> path;
         int totalTime;
         int totalCost;
     };
@@ -28,16 +28,16 @@ public:
 
     /**
      * @brief createFlightList - Creates adjacency list using the data from the given file
-     * @param dataFile - file containing flight data
+     * @param dataPath - file containing flight data
      */
-    void createFlightList(const DSString dataFile);
+    void createFlightList(const DSString dataPath);
 
     /**
      * @brief planFlights - outputs the best 3 flight paths for each plan in the given plans file
-     * @param plansFile - a ptah to the file containing the flight plans
-     * @param outputFile - file to output the best flights
+     * @param plansPath- a ptah to the file containing the flight plans
+     * @param outputPath - file to output the best flights
      */
-    void planFlights(const DSString plansFile, const DSString outputFile);
+    void planFlights(const DSString plansPath, const DSString outputPath);
 
 private:
     const int LAYOVER_TIME = 43;
@@ -46,7 +46,7 @@ private:
     const int AIRLINE_CHANGE_TIME = 22;
     const int AIRLINE_CHANGE_COST = 0;
 
-    DSAdjList<City> flights;
+    DSAdjList<DSString> flights;
 
     /**
      * @brief cheapestFlightPaths - returns the cheapest 3 flight paths between the given cities
@@ -70,6 +70,8 @@ private:
      * @param filePath - path to the output file
      */
     void writeToFile(const DSVector<DSVector<Plan>> paths, const DSString filePath) const;
+
+    int stringToInt(DSString str);
 };
 
 #endif // FLIGHTPLANNER_H
