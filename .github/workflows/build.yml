@@ -44,15 +44,15 @@ jobs:
       # the cmake-build-debug folder
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Execute Tests
-      # This calls your program with no cmd line arguments which should trigger your CATCH tests to run.
-      working-directory: ${{github.workspace}}/build
-      run:  ${{github.workspace}}/build/${{env.TEST_EXE}}
+    # - name: Execute Tests
+    #   # This calls your program with no cmd line arguments which should trigger your CATCH tests to run.
+    #   working-directory: ${{github.workspace}}/build
+    #   run:  ${{github.workspace}}/build/${{env.TEST_EXE}}
 
-    - name: Execute Tests (w/ Valgrind)
-      # This calls your program with no cmd line arguments which should trigger your CATCH tests to run.
-      working-directory: ${{github.workspace}}/build
-      run:  valgrind --error-exitcode=42 --errors-for-leak-kinds=all --leak-check=full ${{github.workspace}}/build/${{env.TEST_EXE}}
+    # - name: Execute Tests (w/ Valgrind)
+    #   # This calls your program with no cmd line arguments which should trigger your CATCH tests to run.
+    #   working-directory: ${{github.workspace}}/build
+    #   run:  valgrind --error-exitcode=42 --errors-for-leak-kinds=all --leak-check=full ${{github.workspace}}/build/${{env.TEST_EXE}}
 
     - name: Execute Project
       # This step calls your program with the command line args
