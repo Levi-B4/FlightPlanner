@@ -26,7 +26,6 @@ void FlightPlanner::createFlightList(const DSString dataPath)
     const char DELIMITER = '|';
     const int NUM_DELIMITERS = 4;
     int delimiterIndexes[NUM_DELIMITERS];
-    Plan plan;
     for(int i = 0; i < numEdges; i++){
         dataFile >> line;
 
@@ -35,33 +34,17 @@ void FlightPlanner::createFlightList(const DSString dataPath)
             delimiterIndexes[j - 1] = index;
         }
 
-        struct PH{
-            PH(){};
-
-            PH(DSString node1, DSString node2, int cost, int time) :
-                node1(node1), node2(node2), cost(cost), time(time){}
-
-            DSString node1 = "";
-            DSString node2 = "";
-
-            int cost = 0;
-            int time = 0;
-        };
-
-        DSVector<PH> weights;
-
         DSString node1 = line.substring(0, delimiterIndexes[0] - 1);
         DSString node2 = line.substring(delimiterIndexes[0], delimiterIndexes[1] - delimiterIndexes[0] - 1);
 
         int cost = stringToInt(line.substring(delimiterIndexes[1], delimiterIndexes[2] - delimiterIndexes[1] - 1));
-
         int time = stringToInt(line.substring(delimiterIndexes[2], delimiterIndexes[3] - delimiterIndexes[2] - 1));
 
         DSString airline = line.substring(delimiterIndexes[3], line.size() - delimiterIndexes[3]);
 
-        flights.addEdge(node1, node2);
+        flightMap.addEdge(node1, node2);
 
-        weights.pushBack(PH(node1, node2, cost, time));
+        flights.pushBack(Flight(node1, node2, airline, cost, time));
     }
 
     dataFile.close();
@@ -74,8 +57,8 @@ void FlightPlanner::createFlightList(const DSString dataPath)
  */
 void FlightPlanner::planFlights(const DSString plansPath, const DSString outputPath)
 {
-    // read plansFile
     std::ifstream plansFile(plansPath.c_str());
+    std::ofstream outputFile(outputPath.c_str());
 
     int numPlans;
 
@@ -101,12 +84,22 @@ void FlightPlanner::planFlights(const DSString plansPath, const DSString outputP
         char comparer = line[line.size() - 1];
 
         Plan current;
+        DSVector<Plan> plans;
+        outputFile << "Flight " << i << ": " << node1 << ", " << node2;
         if(comparer == 'T'){
-            fastestFlightPaths(node1, node2);
+            outputFile << " (Time)" << std::endl;
+            plans = fastestFlightPaths(node1, node2, plans);
         } else{
-            cheapestFlightPaths(node1, node2);
+            outputFile << " (Cost)" << std::endl;
+            plans = cheapestFlightPaths(node1, node2, plans);
         }
+
+        writePlans(plans, outputFile);
+        outputFile << std::endl;
     }
+
+    plansFile.close();
+    outputFile.close();
 }
 
 /**
@@ -115,13 +108,36 @@ void FlightPlanner::planFlights(const DSString plansPath, const DSString outputP
  * @param end - ending city
  * @return a vector containing the cheapest 3 paths
  */
-DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString start, const DSString end)
+DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString start, const DSString end, DSVector<Plan>& plans, DSDoublyLL<DSString> visited)
 {
-    // try all paths between start and end and output a list of the top 3 cheapest fligts
+    visited.pushBack(start);
 
-    std::cout << "Finding cheapest paths between " << start << " and " << end << std::endl;
+    DSDoublyLL<DSString> nodes = flightMap.GetConnectedNodes(start);
 
-    return DSVector<Plan>();
+    for(DSString& node : nodes){
+        if(visited.contains(node)){
+            continue;
+        }
+
+        if(node == end){
+            if(plans.getNumIndexes() < NUM_PLANS_SAVED){
+                plans.pushBack(pathToPlan(visited + end, 'C'));
+            } else {
+                Plan current = pathToPlan(visited + end, 'C');
+                for(int i = 0; i < NUM_PLANS_SAVED; i++){
+                    if(current.cost < plans[i].cost){
+                        Plan temp = current;
+                        current = plans[i];
+                        plans[i] = temp;
+                    }
+                }
+            }
+        } else {
+            fastestFlightPaths(node, end, plans, visited);
+        }
+    }
+
+    return plans;
 }
 
 /**
@@ -130,13 +146,36 @@ DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString 
  * @param end - ending city
  * @return a vector containing the fastest 3 paths
  */
-DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString start, const DSString end)
+DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString start, const DSString end, DSVector<Plan>& plans, DSDoublyLL<DSString> visited)
 {
-    // try all paths between start and end and output a list of the top 3 fastest fligts
+    visited.pushBack(start);
 
-    std::cout << "Finding fastest paths between " << start << " and " << end << std::endl;
+    DSDoublyLL<DSString> nodes = flightMap.GetConnectedNodes(start);
 
-    return DSVector<Plan>();
+    for(DSString& node : nodes){
+        if(visited.contains(node)){
+            continue;
+        }
+
+        if(node == end){
+            if(plans.getNumIndexes() < NUM_PLANS_SAVED){
+                plans.pushBack(pathToPlan(visited + end, 'T'));
+            } else {
+                Plan current = pathToPlan(visited + end, 'T');
+                for(int i = 0; i < NUM_PLANS_SAVED; i++){
+                    if(current.time < plans[i].time){
+                        Plan temp = current;
+                        current = plans[i];
+                        plans[i] = temp;
+                    }
+                }
+            }
+        } else {
+            fastestFlightPaths(node, end, plans, visited);
+        }
+    }
+
+    return plans;
 }
 
 /**
@@ -144,14 +183,19 @@ DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString s
  * @param paths - flight paths to output
  * @param filePath - path to the output file
  */
-void FlightPlanner::writeToFile(const DSVector<DSVector<Plan>> plans, const DSString path) const
+void FlightPlanner::writePlans(const DSVector<Plan> plans, std::ofstream& outputFile) const
 {
-    // write plans to file
+    for(int i = 0; i < plans.getNumIndexes(); i++){
+        Plan currentPlan = plans[i];
+        outputFile << "Path " << i << ": " << pathToString(currentPlan.path);
+        outputFile << ". Time: " << currentPlan.time;
+        outputFile << " Cost: " << currentPlan.cost << std::endl;
+    }
 }
 
 int FlightPlanner::stringToInt(DSString str){
     int total = 0;
-    for(int i = str.size() - 1; i >= 0; i--){
+    for(int i = 0; i < str.size(); i++){
         char c = str[i];
 
         if(c < '0' or c > '9'){
@@ -160,7 +204,7 @@ int FlightPlanner::stringToInt(DSString str){
         }
 
         int tens = 1;
-        for(int j = 0; j < i; j++){
+        for(int j = i; j < str.size() - 1; j++){
             tens *= 10;
         }
 
@@ -168,4 +212,94 @@ int FlightPlanner::stringToInt(DSString str){
     }
 
     return total;
+}
+
+DSString FlightPlanner::pathToString(const DSDoublyLL<DSString> path) const{
+    if(path.getNumIndexes() == 0){
+        return "";
+    }
+
+    DSString output = "";
+    DSString Start = path[0];
+    DSString end = path[path.size() - 1];
+
+    for(int i = 0; i < path.getNumIndexes() - 1; i++){
+        output += path[i] += " -> ";
+    }
+
+    output += end;
+
+    return output;
+}
+
+FlightPlanner::Plan FlightPlanner::pathToPlan(const DSDoublyLL<DSString> path, const char priority) const{
+    Plan output;
+
+    int time = 0;
+    int cost = 0;
+
+    DSString lastAirline = "";
+
+    for(int i = 0; i < path.getNumIndexes() - 1; i++){
+        DSString city1 = path[i];
+        DSString city2 = path[i+1];
+
+        DSVector<Flight> possibleFlights;
+
+        //add looking for airline and comparing the penalty with not switching
+        for(int j = 0; j < flights.getNumIndexes(); j++){
+            Flight flight = flights[j];
+            if(flight.city1 == city1 && flight.city2 == city2 ||
+                    flight.city1 == city2 && flight.city2 == city1){
+                possibleFlights.pushBack(flight);
+                break;
+            }
+        }
+
+        Flight chosenPath;
+        chosenPath = minPath(possibleFlights, lastAirline, priority);
+
+        lastAirline = chosenPath.airline;
+
+        time += chosenPath.time;
+        cost += chosenPath.cost;
+    }
+
+    // layover addition
+    time += (path.getNumIndexes() - 2) * LAYOVER_TIME;
+    cost += (path.getNumIndexes() - 2) * LAYOVER_COST;
+
+    output = Plan(path, cost, time);
+
+    return output;
+}
+
+FlightPlanner::Flight FlightPlanner::minPath(DSVector<Flight> testFlights, DSString airline, char comparer) const{
+    Flight output;
+    int min = -1;
+    for(int i = 0; i < testFlights.getNumIndexes(); i++){
+        Flight current = testFlights[i];
+        Flight currentTotal = current;
+        if(airline == "" || airline == current.airline){
+            currentTotal.time = current.time;
+            currentTotal.cost = current.cost;
+        } else {
+            currentTotal.time = current.time + AIRLINE_CHANGE_TIME;
+            currentTotal.cost = current.cost + AIRLINE_CHANGE_COST;
+        }
+
+        int compareInt = -1;
+        if(comparer == 'T'){
+            compareInt = currentTotal.time;
+        } else {
+            compareInt = currentTotal.cost;
+        }
+
+        if(compareInt < min || min == -1){
+            min = compareInt;
+            output = currentTotal;
+        }
+    }
+
+    return output;
 }

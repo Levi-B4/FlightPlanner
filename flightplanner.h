@@ -8,17 +8,27 @@
 class FlightPlanner
 {
 public:
-    struct City{
-        DSString name;
+    struct Flight{
+        Flight(){}
+        Flight(DSString city1, DSString city2, DSString airline, int cost, int time) :
+            city1(city1), city2(city2), airline(airline), cost(cost), time(time){}
+
+        DSString city1;
+        DSString city2;
         DSString airline;
-        int time;
         int cost;
+        int time;
     };
 
     struct Plan{
-        DSVector<DSString> path;
-        int totalTime;
-        int totalCost;
+        Plan(){};
+
+        Plan(DSDoublyLL<DSString> path, int cost, int time) :
+            path(path), cost(cost), time(time){}
+
+        DSDoublyLL<DSString> path;
+        int cost;
+        int time;
     };
 
     /**
@@ -46,7 +56,10 @@ private:
     const int AIRLINE_CHANGE_TIME = 22;
     const int AIRLINE_CHANGE_COST = 0;
 
-    DSAdjList<DSString> flights;
+    const int NUM_PLANS_SAVED = 3;
+
+    DSAdjList<DSString> flightMap;
+    DSDoublyLL<Flight> flights;
 
     /**
      * @brief cheapestFlightPaths - returns the cheapest 3 flight paths between the given cities
@@ -54,7 +67,7 @@ private:
      * @param end - ending city
      * @return a vector containing the cheapest 3 paths
      */
-    DSVector<Plan> cheapestFlightPaths(const DSString start, const DSString end);
+    DSVector<Plan> cheapestFlightPaths(const DSString start, const DSString end, DSVector<Plan>& plans, DSDoublyLL<DSString> visited = {});
 
     /**
      * @brief fastestFlightPaths - returns the fastest 3 flight paths between the given cities
@@ -62,16 +75,22 @@ private:
      * @param end - ending city
      * @return a vector containing the fastest 3 paths
      */
-    DSVector<Plan> fastestFlightPaths(const DSString start, const DSString end);
+    DSVector<Plan> fastestFlightPaths(const DSString start, const DSString end, DSVector<Plan>& plans, DSDoublyLL<DSString> visited = {});
 
     /**
      * @brief writeToFile - outputs the given flight paths to the given file
      * @param paths - flight paths to output
      * @param filePath - path to the output file
      */
-    void writeToFile(const DSVector<DSVector<Plan>> paths, const DSString filePath) const;
+    void writePlans(const DSVector<Plan> paths, std::ofstream& outputFile) const;
 
     int stringToInt(DSString str);
+
+    DSString pathToString(const DSDoublyLL<DSString> path) const;
+
+    Plan pathToPlan(const DSDoublyLL<DSString> path, const char priority) const;
+
+    Flight minPath(DSVector<Flight> flights, DSString airline, char comparer) const;
 };
 
 #endif // FLIGHTPLANNER_H
