@@ -24,6 +24,8 @@ add_executable(FlightPlanner
     DataStructures/DSStack/dsstack.h
     DataStructures/DSString/dsstring.h DataStructures/DSString/dsstring.cpp
     DataStructures/DSVector/dsvector.h
+
+    DataStructures/catch.hpp DataStructures/test.cpp
 )
 
 include(GNUInstallDirs)
