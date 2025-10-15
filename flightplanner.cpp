@@ -214,36 +214,6 @@ int FlightPlanner::stringToInt(DSString str){
     return total;
 }
 
-FlightPlanner::Flight FlightPlanner::minPath(DSVector<Flight> flights, DSString airline, char comparer) const{
-    Flight output;
-    int min = -1;
-    for(int i = 0; i < flights.getNumIndexes(); i++){
-        Flight current = flights[0];
-        Flight currentTotal = current;
-        if(airline == "" or airline == current.airline){
-            currentTotal.time = current.time;
-            currentTotal.time = current.cost;
-        } else {
-            currentTotal.time = current.time + AIRLINE_CHANGE_TIME;
-            currentTotal.time = current.cost + AIRLINE_CHANGE_COST;
-        }
-
-        int compareInt = -1;
-        if(comparer == 'T'){
-            compareInt = currentTotal.time;
-        } else {
-            compareInt = currentTotal.cost;
-        }
-
-        if(compareInt < min || min == -1){
-            min = compareInt;
-            output = currentTotal;
-        }
-    }
-
-    return output;
-}
-
 DSString FlightPlanner::pathToString(const DSDoublyLL<DSString> path) const{
     if(path.getNumIndexes() == 0){
         return "";
@@ -298,6 +268,36 @@ FlightPlanner::Plan FlightPlanner::pathToPlan(const DSDoublyLL<DSString> path, c
     cost += (path.getNumIndexes() - 2) * LAYOVER_COST;
 
     output = Plan(path, cost, time);
+
+    return output;
+}
+
+FlightPlanner::Flight FlightPlanner::minPath(DSVector<Flight> flights, DSString airline, char comparer) const{
+    Flight output;
+    int min = -1;
+    for(int i = 0; i < flights.getNumIndexes(); i++){
+        Flight current = flights[0];
+        Flight currentTotal = current;
+        if(airline == "" || airline == current.airline){
+            currentTotal.time = current.time;
+            currentTotal.cost = current.cost;
+        } else {
+            currentTotal.time = current.time + AIRLINE_CHANGE_TIME;
+            currentTotal.cost = current.cost + AIRLINE_CHANGE_COST;
+        }
+
+        int compareInt = -1;
+        if(comparer == 'T'){
+            compareInt = currentTotal.time;
+        } else {
+            compareInt = currentTotal.cost;
+        }
+
+        if(compareInt < min || min == -1){
+            min = compareInt;
+            output = currentTotal;
+        }
+    }
 
     return output;
 }

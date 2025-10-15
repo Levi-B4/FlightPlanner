@@ -21,9 +21,11 @@ int main(int argc, char* argv[])
     } else{
         std::cout << "Welcome to the flight planner!" << std::endl;
 
-        DSString dataPath = argv[1];
-        DSString plansPath = argv[2];
-        DSString outputPath = argv[3];
+        argv = &argv[1];
+
+        DSString dataPath = argv[0];
+        DSString plansPath = argv[1];
+        DSString outputPath = argv[2];
 
         FlightPlanner flights = FlightPlanner();
 
