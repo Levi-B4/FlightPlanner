@@ -16,7 +16,12 @@ public:
     };
 
     struct Plan{
-        DSVector<DSString> path;
+        Plan(){};
+
+        Plan(DSDoublyLL<DSString> path, int totalTime, int totalCost) :
+            path(path), totalTime(totalTime), totalCost(totalCost){}
+
+        DSDoublyLL<DSString> path;
         int totalTime;
         int totalCost;
     };
@@ -46,6 +51,8 @@ private:
     const int AIRLINE_CHANGE_TIME = 22;
     const int AIRLINE_CHANGE_COST = 0;
 
+    const int NUM_PLANS_SAVED = 3;
+
     DSAdjList<DSString> flights;
 
     /**
@@ -54,7 +61,7 @@ private:
      * @param end - ending city
      * @return a vector containing the cheapest 3 paths
      */
-    DSVector<Plan> cheapestFlightPaths(const DSString start, const DSString end);
+    DSVector<Plan> cheapestFlightPaths(const DSString start, const DSString end, DSVector<Plan>& plans, DSDoublyLL<DSString> visited = {});
 
     /**
      * @brief fastestFlightPaths - returns the fastest 3 flight paths between the given cities
@@ -62,16 +69,18 @@ private:
      * @param end - ending city
      * @return a vector containing the fastest 3 paths
      */
-    DSVector<Plan> fastestFlightPaths(const DSString start, const DSString end);
+    DSVector<Plan> fastestFlightPaths(const DSString start, const DSString end, DSVector<Plan>& plans, DSDoublyLL<DSString> visited = {});
 
     /**
      * @brief writeToFile - outputs the given flight paths to the given file
      * @param paths - flight paths to output
      * @param filePath - path to the output file
      */
-    void writeToFile(const DSVector<DSVector<Plan>> paths, const DSString filePath) const;
+    void writePlans(const DSVector<Plan> paths, std::ofstream& outputFile) const;
 
     int stringToInt(DSString str);
+
+    DSString pathToString(const DSDoublyLL<DSString> path) const;
 };
 
 #endif // FLIGHTPLANNER_H

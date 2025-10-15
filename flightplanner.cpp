@@ -26,7 +26,6 @@ void FlightPlanner::createFlightList(const DSString dataPath)
     const char DELIMITER = '|';
     const int NUM_DELIMITERS = 4;
     int delimiterIndexes[NUM_DELIMITERS];
-    Plan plan;
     for(int i = 0; i < numEdges; i++){
         dataFile >> line;
 
@@ -74,8 +73,8 @@ void FlightPlanner::createFlightList(const DSString dataPath)
  */
 void FlightPlanner::planFlights(const DSString plansPath, const DSString outputPath)
 {
-    // read plansFile
     std::ifstream plansFile(plansPath.c_str());
+    std::ofstream outputFile(outputPath.c_str());
 
     int numPlans;
 
@@ -101,12 +100,22 @@ void FlightPlanner::planFlights(const DSString plansPath, const DSString outputP
         char comparer = line[line.size() - 1];
 
         Plan current;
+        DSVector<Plan> plans;
+        outputFile << "Flight " << i << ": " << node1 << ", " << node2;
         if(comparer == 'T'){
-            fastestFlightPaths(node1, node2);
+            outputFile << " (Time)" << std::endl;
+            plans = fastestFlightPaths(node1, node2, plans);
         } else{
-            cheapestFlightPaths(node1, node2);
+            outputFile << " (Cost)" << std::endl;
+            plans = cheapestFlightPaths(node1, node2, plans);
         }
+
+        writePlans(plans, outputFile);
+        outputFile << std::endl;
     }
+
+    plansFile.close();
+    outputFile.close();
 }
 
 /**
@@ -115,13 +124,30 @@ void FlightPlanner::planFlights(const DSString plansPath, const DSString outputP
  * @param end - ending city
  * @return a vector containing the cheapest 3 paths
  */
-DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString start, const DSString end)
+DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString start, const DSString end, DSVector<Plan>& plans, DSDoublyLL<DSString> visited)
 {
-    // try all paths between start and end and output a list of the top 3 cheapest fligts
+    visited.pushBack(start);
 
-    std::cout << "Finding cheapest paths between " << start << " and " << end << std::endl;
+    DSDoublyLL<DSString> nodes = flights.GetConnectedNodes(start);
 
-    return DSVector<Plan>();
+    for(DSString& node : nodes){
+        if(visited.contains(node)){
+            continue;
+        }
+
+        if(node == end){
+            if(plans.getNumIndexes() < NUM_PLANS_SAVED){
+                plans.pushBack(Plan(visited + end, -1, -1));
+            } else {
+                // make this check for top [NUM_PLANS_SAVED]
+                plans.pushBack(Plan(visited + end, -1, -1));
+            }
+        } else {
+            cheapestFlightPaths(node, end, plans, visited);
+        }
+    }
+
+    return plans;
 }
 
 /**
@@ -130,13 +156,30 @@ DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString 
  * @param end - ending city
  * @return a vector containing the fastest 3 paths
  */
-DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString start, const DSString end)
+DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString start, const DSString end, DSVector<Plan>& plans, DSDoublyLL<DSString> visited)
 {
-    // try all paths between start and end and output a list of the top 3 fastest fligts
+    visited.pushBack(start);
 
-    std::cout << "Finding fastest paths between " << start << " and " << end << std::endl;
+    DSDoublyLL<DSString> nodes = flights.GetConnectedNodes(start);
 
-    return DSVector<Plan>();
+    for(DSString& node : nodes){
+        if(visited.contains(node)){
+            continue;
+        }
+
+        if(node == end){
+            if(plans.getNumIndexes() < NUM_PLANS_SAVED){
+                plans.pushBack(Plan(visited + end, -1, -1));
+            } else {
+                // make this check for top [NUM_PLANS_SAVED]
+                plans.pushBack(Plan(visited + end, -1, -1));
+            }
+        } else {
+            fastestFlightPaths(node, end, plans, visited);
+        }
+    }
+
+    return plans;
 }
 
 /**
@@ -144,9 +187,14 @@ DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString s
  * @param paths - flight paths to output
  * @param filePath - path to the output file
  */
-void FlightPlanner::writeToFile(const DSVector<DSVector<Plan>> plans, const DSString path) const
+void FlightPlanner::writePlans(const DSVector<Plan> plans, std::ofstream& outputFile) const
 {
-    // write plans to file
+    for(int i = 0; i < plans.getNumIndexes(); i++){
+        Plan currentPlan = plans[i];
+        outputFile << "Path " << i << ": " << pathToString(currentPlan.path);
+        outputFile << ". Time: " << currentPlan.totalTime;
+        outputFile << " Cost: " << currentPlan.totalCost << std::endl;
+    }
 }
 
 int FlightPlanner::stringToInt(DSString str){
@@ -168,4 +216,23 @@ int FlightPlanner::stringToInt(DSString str){
     }
 
     return total;
+}
+
+DSString FlightPlanner::pathToString(const DSDoublyLL<DSString> path) const
+{
+    if(path.getNumIndexes() == 0){
+        return "";
+    }
+
+    DSString output = "";
+    DSString Start = path[0];
+    DSString end = path[path.size() - 1];
+
+    for(int i = 0; i < path.getNumIndexes() - 1; i++){
+        output += path[i] += " -> ";
+    }
+
+    output += end;
+
+    return output;
 }
