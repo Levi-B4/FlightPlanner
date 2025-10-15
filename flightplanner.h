@@ -8,22 +8,27 @@
 class FlightPlanner
 {
 public:
-    struct City{
-        DSString name;
+    struct Flight{
+        Flight(){}
+        Flight(DSString city1, DSString city2, DSString airline, int cost, int time) :
+            city1(city1), city2(city2), airline(airline), cost(cost), time(time){}
+
+        DSString city1;
+        DSString city2;
         DSString airline;
-        int time;
         int cost;
+        int time;
     };
 
     struct Plan{
         Plan(){};
 
-        Plan(DSDoublyLL<DSString> path, int totalTime, int totalCost) :
-            path(path), totalTime(totalTime), totalCost(totalCost){}
+        Plan(DSDoublyLL<DSString> path, int cost, int time) :
+            path(path), cost(cost), time(time){}
 
         DSDoublyLL<DSString> path;
-        int totalTime;
-        int totalCost;
+        int cost;
+        int time;
     };
 
     /**
@@ -53,7 +58,8 @@ private:
 
     const int NUM_PLANS_SAVED = 3;
 
-    DSAdjList<DSString> flights;
+    DSAdjList<DSString> flightMap;
+    DSDoublyLL<Flight> flights;
 
     /**
      * @brief cheapestFlightPaths - returns the cheapest 3 flight paths between the given cities
@@ -81,6 +87,8 @@ private:
     int stringToInt(DSString str);
 
     DSString pathToString(const DSDoublyLL<DSString> path) const;
+
+    Plan pathToPlan(const DSDoublyLL<DSString> path, const char priority) const;
 };
 
 #endif // FLIGHTPLANNER_H
