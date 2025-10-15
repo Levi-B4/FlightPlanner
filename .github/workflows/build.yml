@@ -2,7 +2,7 @@ name: CMake
 
 on:
   push:
-    branches: [main, listTopFlights]
+    branches: [main]
 
 env:
   # Setting the Build type to Debug
