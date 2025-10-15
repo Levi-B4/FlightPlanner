@@ -259,6 +259,8 @@ FlightPlanner::Plan FlightPlanner::pathToPlan(const DSDoublyLL<DSString> path, c
         Flight chosenPath;
         chosenPath = minPath(possibleFlights, lastAirline, priority);
 
+        lastAirline = chosenPath.airline;
+
         time += chosenPath.time;
         cost += chosenPath.cost;
     }
@@ -272,11 +274,11 @@ FlightPlanner::Plan FlightPlanner::pathToPlan(const DSDoublyLL<DSString> path, c
     return output;
 }
 
-FlightPlanner::Flight FlightPlanner::minPath(DSVector<Flight> flights, DSString airline, char comparer) const{
+FlightPlanner::Flight FlightPlanner::minPath(DSVector<Flight> testFlights, DSString airline, char comparer) const{
     Flight output;
     int min = -1;
-    for(int i = 0; i < flights.getNumIndexes(); i++){
-        Flight current = flights[0];
+    for(int i = 0; i < testFlights.getNumIndexes(); i++){
+        Flight current = testFlights[i];
         Flight currentTotal = current;
         if(airline == "" || airline == current.airline){
             currentTotal.time = current.time;
