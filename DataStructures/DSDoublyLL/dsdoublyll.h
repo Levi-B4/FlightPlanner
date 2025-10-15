@@ -5,269 +5,283 @@
 
 template <class T>
 class DSDoublyLL{
-    private:
-        /**
+private:
+    /**
          * @brief The iterator struct - iterator for the vector class
          */
-        struct iterator{
-            public:
-                friend class DSDoublyLL;
+    struct iterator{
+    public:
+        friend class DSDoublyLL;
 
-                /**
+        /**
                  * @brief iterator - constructor
                  * @param ptr - pointer to the node which to start iteration from
                  */
-                iterator(DSNode<T>* ptr): ptr(ptr){};
+        iterator(DSNode<T>* ptr): ptr(ptr){};
 
-                /**
+        /**
                  * @brief operator * - dereferences pointer and returns node's data
                  * @return reference of the class T at the pointer's location
                  */
-                T& operator*() const{
-                    return ptr->data;
-                }
+        T& operator*() const{
+            return ptr->data;
+        }
 
-                /**
+        /**
                  * @brief operator -> returns the address of the data of the node pointed to
                  * @return address to a node's data
                  */
-                T* operator->() const{
-                    return &(ptr->data);
-                }
+        T* operator->() const{
+            return &(ptr->data);
+        }
 
-                /**
+        /**
                  * @brief operator ++ - iterates to next node
                  * @return this iterator after iteration
                  */
-                iterator operator++(){
-                    ptr = ptr->next;
-                    return *this;
-                }
+        iterator operator++(){
+            ptr = ptr->next;
+            return *this;
+        }
 
-                /**
+        /**
                  * @brief operator ++ - iterates to next pointer
                  * @return a reference to an iterator before iteration
                  */
-                iterator operator++(int){
-                    iterator tmp = *this;
-                    ptr = ptr->next;
-                    return tmp;
-                }
+        iterator operator++(int){
+            iterator tmp = *this;
+            ptr = ptr->next;
+            return tmp;
+        }
 
-                /**
+        /**
                  * @brief operator -- : iterates to previous pointer
                  * @return this iterator after iteration
                  */
-                iterator operator--(){
-                    ptr = ptr->prev;
-                    return *this;
-                }
+        iterator operator--(){
+            ptr = ptr->prev;
+            return *this;
+        }
 
-                /**
+        /**
                  * @brief operator -- :  iterates to previous  pointer
                  * @return a reference to an iterator before iteration
                  */
-                iterator operator--(int){
-                    iterator tmp = *this;
-                    ptr = ptr->prev;
-                    return tmp;
-                }
+        iterator operator--(int){
+            iterator tmp = *this;
+            ptr = ptr->prev;
+            return tmp;
+        }
 
-                /**
+        /**
                  * @brief operator == compares if two iterators are equal
                  * @param a - first iterator to compare
                  * @param b - second iterator to compare
                  * @return true if the two iterators are equal
                  */
-                friend bool operator==(const iterator& a, const iterator& b){
-                    return a.ptr == b.ptr;
-                }
+        friend bool operator==(const iterator& a, const iterator& b){
+            return a.ptr == b.ptr;
+        }
 
-                /**
+        /**
                  * @brief operator != compares if two iterators are equal
                  * @param a - first iterator to compare
                  * @param b - second iterator to compare
                  * @return true if the two iterators are not equal
                  */
-                friend bool operator!=(const iterator& a, const iterator& b){
-                    return a.ptr != b.ptr;
-                }
-            private:
-                DSNode<T>* ptr;
-        };
-    public:
-        /**
+        friend bool operator!=(const iterator& a, const iterator& b){
+            return a.ptr != b.ptr;
+        }
+    private:
+        DSNode<T>* ptr;
+    };
+public:
+    /**
          * @brief DSDoublyLL - default constructor
          */
-        DSDoublyLL();
+    DSDoublyLL();
 
-        /**
+    /**
          * @brief DSDoublyLL - constructor
          * @param data - pointer to array of size elements
          * @param size - size of data array
          */
-        DSDoublyLL(const T* data, const int size);
+    DSDoublyLL(const T* data, const int size);
 
-        /**
+    /**
          * @brief DSDoublyLL - copy constructor
          * @param other - reference of list to copy
          */
-        DSDoublyLL(const DSDoublyLL<T>& other);
+    DSDoublyLL(const DSDoublyLL<T>& other);
 
 
-        /**
+    /**
          * @brief getNumIndexes - Getter: numIndexes
          * @return numIndexes
          */
-        int getNumIndexes() const;
+    int getNumIndexes() const;
 
-        /**
+    /**
          * @brief pushFront - adds element data to the front of the list
          * @param data - data to be added
          */
-        void pushFront(const T data);
+    void pushFront(const T data);
 
-        /**
+    /**
          * @brief pushBack - adds data to the front of the list
          * @param data - data to be added
          */
-        void pushBack(const T data);
+    void pushBack(const T data);
 
-        /**
+    /**
          * @brief insert - inserts data in list at given index
          * @param data - data to be added
          * @param index - index to insert data
          */
-        void insert(int index, const T data);
+    void insert(int index, const T data);
 
-        /**
+    /**
          * @brief remove - removes data from list at given index
          * @param index - index to be removed
          */
-        void removeAt(int index);
+    void removeAt(int index);
 
-        /**
+    /**
          * @brief removeAt - removes data from given node location
          * @param index - location of node to be removed
          */
-        iterator removeAt(iterator index);
+    iterator removeAt(iterator index);
 
-        /**
+    /**
          * @brief remove - removes given data from list
          * @param onlyFirst - if true, only the first instance is deleted
          */
-        void remove(const T element, bool onlyFirst = false);
+    void remove(const T element, bool onlyFirst = false);
 
-        /**
+    /**
          * @brief clear - removes all data from list
          */
-        void clear();
+    void clear();
 
-        /**
+    /**
          * @brief popFront - removes first node from list
          */
-        void popFront();
+    void popFront();
 
-        /**
+    /**
          * @brief popBack - removes last node from list
          */
-        void popBack();
+    void popBack();
 
-        /**
+    /**
          * @brief contains - returns true if the given item is in the list
          * @param query - item to search for
          * @return true if item is in the list
          */
-        bool contains(const T query) const;
+    bool contains(const T query) const;
 
-        /**
+    /**
          * @brief size - returns the size of the list
          * @return size of the list
          */
-        int size() const;
+    int size() const;
 
-        /**
+    /**
          * @brief unorderedEquals - compares two lists by seeing if they contain the same elements
          * @param other - list to compare against
          * @return true if both lists contain the same elements
          */
-        bool unorderedEquals(const DSDoublyLL<T>& other) const;
+    bool unorderedEquals(const DSDoublyLL<T>& other) const;
 
-        /**
+    /**
          * @brief DSDoublyLL::operator [] - returns data at passed index
          * @param index - index to retrieve data
          * @return data at passed index
          */
-        T& operator[](int index) const;
+    T& operator[](int index) const;
 
-        /**
+    /**
          * @brief operator = :  sets this list equal to the list passed in
          * @param other - reference to target list
          * @return returns this
          */
-        DSDoublyLL<T>& operator=(const DSDoublyLL<T>& other);
+    DSDoublyLL<T>& operator=(const DSDoublyLL<T>& other);
 
-        /**
+    /**
          * @brief operator + : returns a linked list combining this and the given list
          * @param other - reference to given list
          * @return combined linked list of this and given list
          */
-        DSDoublyLL<T> operator+(const DSDoublyLL<T>& other) const;
+    DSDoublyLL<T> operator+(const DSDoublyLL<T>& other) const;
 
-        /**
-         * @brief operator += : combines this
-         * @param other
-         * @return
+    /**
+         * @brief operator + : returns a linked list combining this list with the given element
+         * @param other - reference to given the element
+         * @return combined linked list of this and given list
          */
-        DSDoublyLL<T>& operator+=(const DSDoublyLL<T>& other);
+    DSDoublyLL<T> operator+(const T& other) const;
 
-        /**
+    /**
+         * @brief operator += : combines this with the given linked list
+         * @param other: referrence to the linked list to combine with this
+         * @return this
+         */
+    DSDoublyLL<T>& operator+=(const DSDoublyLL<T>& other);
+
+    /**
+         * @brief operator += : returns a linked list combining this list with the given element
+         * @param other - reference to the element to append to this
+         * @return this
+         */
+    DSDoublyLL<T>& operator+=(const T& other);
+
+    /**
          * @brief operator == :  compares this list against another list
          * @param other - reference to target list
          * @return true if the lists have equal values
          */
-        bool operator==(const DSDoublyLL<T>& other) const;
+    bool operator==(const DSDoublyLL<T>& other) const;
 
-        /**
+    /**
          * @brief operator != : compares this list against another list
          * @param other - reference to target list
          * @return false if the lists have equal values
          */
-        bool operator!=(const DSDoublyLL<T>& other) const;
+    bool operator!=(const DSDoublyLL<T>& other) const;
 
-        /**
+    /**
          * @brief ~DSDoublyLL - default destructor
          */
-        ~DSDoublyLL();
+    ~DSDoublyLL();
 
-        /**
+    /**
          * @brief begin - returns an iterator for the first element of the list
          * @return iterator for the first element of the list
          */
-        inline iterator begin() {
-            return iterator(head);
-        };
+    inline iterator begin() {
+        return iterator(head);
+    };
 
-        /**
+    /**
          * @brief begin - returns an iterator for the element after the last element of the list, nullptr
          * @return iterator for the element after the last element of the list, nullptr
          */
-        inline iterator end() {
-            return iterator(nullptr);
-        }
+    inline iterator end() {
+        return iterator(nullptr);
+    }
 
-    private:
-        DSNode<T>* head = nullptr;
-        DSNode<T>* tail = nullptr;
+private:
+    DSNode<T>* head = nullptr;
+    DSNode<T>* tail = nullptr;
 
-        int numIndexes = 0;
+    int numIndexes = 0;
 
-        /**
+    /**
          * @brief getNodeAt: returns node at given index
          * @param index - index at which the node is
          * @return node pointer
          */
-        DSNode<T>* getNodeAt(int index) const;
+    DSNode<T>* getNodeAt(int index) const;
 };
 
 /**
@@ -777,6 +791,24 @@ DSDoublyLL<T> DSDoublyLL<T>::operator+(const DSDoublyLL<T>& other) const{
 }
 
 /**
+ * @brief operator + : returns a linked list combining this list with the given element
+ * @param data - reference to given the element
+ * @return combined linked list of this and given list
+ */
+template <class T>
+DSDoublyLL<T> DSDoublyLL<T>::operator+(const T& data) const{
+    DSDoublyLL<T> result;
+
+    for(DSNode<T>* current = this->head; current != nullptr; current = current->next){
+        result.pushBack(current->data);
+    }
+
+    result.pushBack(data);
+
+    return result;
+}
+
+/**
  * @brief operator += : sets data equal to this and the given doubly linked list
  * @param other - the list to be added to this
  * @return a reference to this
@@ -789,6 +821,19 @@ DSDoublyLL<T>& DSDoublyLL<T>::operator+=(const DSDoublyLL<T>& other){
 
     return *this;
 }
+
+/**
+ * @brief operator += : returns a linked list combining this list with the given element
+ * @param other - reference to the element to append to this
+ * @return data
+ */
+template <class T>
+DSDoublyLL<T>& DSDoublyLL<T>::operator+=(const T& data){
+    pushBack(data);
+
+    return *this;
+}
+
 
 /**
  * @brief operator == :  compares this list against another list
