@@ -86,6 +86,8 @@ private:
 
     int stringToInt(DSString str);
 
+    Flight minPath(DSVector<Flight> flights, DSString airline, char comparer) const;
+
     DSString pathToString(const DSDoublyLL<DSString> path) const;
 
     Plan pathToPlan(const DSDoublyLL<DSString> path, const char priority) const;

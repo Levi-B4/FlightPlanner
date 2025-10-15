@@ -123,11 +123,17 @@ DSVector<FlightPlanner::Plan> FlightPlanner::cheapestFlightPaths(const DSString 
             if(plans.getNumIndexes() < NUM_PLANS_SAVED){
                 plans.pushBack(pathToPlan(visited + end, 'C'));
             } else {
-                // make this check for top [NUM_PLANS_SAVED]
-                plans.pushBack(pathToPlan(visited + end, 'C'));
+                Plan current = pathToPlan(visited + end, 'C');
+                for(int i = 0; i < NUM_PLANS_SAVED; i++){
+                    if(current.cost < plans[i].cost){
+                        Plan temp = current;
+                        current = plans[i];
+                        plans[i] = temp;
+                    }
+                }
             }
         } else {
-            cheapestFlightPaths(node, end, plans, visited);
+            fastestFlightPaths(node, end, plans, visited);
         }
     }
 
@@ -155,8 +161,14 @@ DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString s
             if(plans.getNumIndexes() < NUM_PLANS_SAVED){
                 plans.pushBack(pathToPlan(visited + end, 'T'));
             } else {
-                // make this check for top [NUM_PLANS_SAVED]
-                plans.pushBack(pathToPlan(visited + end, 'T'));
+                Plan current = pathToPlan(visited + end, 'T');
+                for(int i = 0; i < NUM_PLANS_SAVED; i++){
+                    if(current.time < plans[i].time){
+                        Plan temp = current;
+                        current = plans[i];
+                        plans[i] = temp;
+                    }
+                }
             }
         } else {
             fastestFlightPaths(node, end, plans, visited);
@@ -202,8 +214,37 @@ int FlightPlanner::stringToInt(DSString str){
     return total;
 }
 
-DSString FlightPlanner::pathToString(const DSDoublyLL<DSString> path) const
-{
+FlightPlanner::Flight FlightPlanner::minPath(DSVector<Flight> flights, DSString airline, char comparer) const{
+    Flight output;
+    int min = -1;
+    for(int i = 0; i < flights.getNumIndexes(); i++){
+        Flight current = flights[0];
+        Flight currentTotal = current;
+        if(airline == "" or airline == current.airline){
+            currentTotal.time = current.time;
+            currentTotal.time = current.cost;
+        } else {
+            currentTotal.time = current.time + AIRLINE_CHANGE_TIME;
+            currentTotal.time = current.cost + AIRLINE_CHANGE_COST;
+        }
+
+        int compareInt = -1;
+        if(comparer == 'T'){
+            compareInt = currentTotal.time;
+        } else {
+            compareInt = currentTotal.cost;
+        }
+
+        if(compareInt < min || min == -1){
+            min = compareInt;
+            output = currentTotal;
+        }
+    }
+
+    return output;
+}
+
+DSString FlightPlanner::pathToString(const DSDoublyLL<DSString> path) const{
     if(path.getNumIndexes() == 0){
         return "";
     }
@@ -221,34 +262,41 @@ DSString FlightPlanner::pathToString(const DSDoublyLL<DSString> path) const
     return output;
 }
 
-FlightPlanner::Plan FlightPlanner::pathToPlan(const DSDoublyLL<DSString> path, const char priority) const
-{
-    /*
-        for n=nodes and c=changes there is 49(n-2)+22c time
-
-        for n=nodes and c=changes there is 19(n-2)+0c time
-    */
-
+FlightPlanner::Plan FlightPlanner::pathToPlan(const DSDoublyLL<DSString> path, const char priority) const{
     Plan output;
 
     int time = 0;
     int cost = 0;
 
+    DSString lastAirline = "";
+
     for(int i = 0; i < path.getNumIndexes() - 1; i++){
         DSString city1 = path[i];
         DSString city2 = path[i+1];
+
+        DSVector<Flight> possibleFlights;
 
         //add looking for airline and comparing the penalty with not switching
         for(int j = 0; j < flights.getNumIndexes(); j++){
             Flight flight = flights[j];
             if(flight.city1 == city1 && flight.city2 == city2 ||
                     flight.city1 == city2 && flight.city2 == city1){
-                time += flight.time;
-                cost += flight.cost;
+                possibleFlights.pushBack(flight);
                 break;
             }
         }
+
+        Flight chosenPath;
+        chosenPath = minPath(possibleFlights, lastAirline, priority);
+
+        time += chosenPath.time;
+        cost += chosenPath.cost;
     }
+
+    // layover addition
+    time += (path.getNumIndexes() - 2) * LAYOVER_TIME;
+    cost += (path.getNumIndexes() - 2) * LAYOVER_COST;
+
     output = Plan(path, cost, time);
 
     return output;
