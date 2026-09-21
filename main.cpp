@@ -16,7 +16,7 @@ int runCatchTests(int argc, char* argv[]){
 
 int main(int argc, char* argv[])
 {
-    if(argc == 0){
+    if(argc == 1){
         std::cout << "Running tests" << std::endl;
         return runCatchTests(argc, argv);
     } else if(argc != 4){
