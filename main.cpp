@@ -6,8 +6,6 @@
 #include "flightplanner.h"
 #include "DataStructures/catch.hpp"
 
-// Test flag
-#define TEST false
 
 // runs test.cpp using catch2 lib
 int runCatchTests(int argc, char* argv[]){
@@ -16,16 +14,17 @@ int runCatchTests(int argc, char* argv[]){
 
 int main(int argc, char* argv[])
 {
-    if(TEST){
+    if(argc == 1){
+        std::cout << "Running tests..." << std::endl;
         return runCatchTests(argc, argv);
-    } else{
+    } else if(argc != 4){
+        std::cerr << "3 parameters were expected, but " << argc - 1 << " were given." << std::endl;
+        return -1;
+    } else {
         std::cout << "Welcome to the flight planner!" << std::endl;
-
-        argv = &argv[1];
-
-        DSString dataPath = argv[0];
-        DSString plansPath = argv[1];
-        DSString outputPath = argv[2];
+        DSString dataPath = argv[1];
+        DSString plansPath = argv[2];
+        DSString outputPath = argv[3];
 
         FlightPlanner flights = FlightPlanner();
 

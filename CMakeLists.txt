@@ -8,9 +8,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # input files
 set (input01 "data/sample01-flight-data.txt")
 set (input02 "data/sample01-req-flights.txt")
+set (input03 "data/sample02-flight-data.txt")
+set (input04 "data/sample02-req-flights.txt")
+set (test01  "data/sample01-output-target.txt")
+set (test02  "data/sample02-output-target.txt")
 
 # Copy data files to build dir
-foreach(file IN LISTS input01 input02)
+foreach(file IN LISTS input01 input02 input03 input04 test01 test02)
     configure_file(${file} ${file} COPYONLY)
 endforeach()
 
