@@ -17,8 +17,13 @@ void FlightPlanner::createFlightList(const DSString dataPath)
 {
     std::ifstream dataFile(dataPath.c_str());
 
+    if(dataFile.fail()){
+        std::cerr << "Could not open flight data file: \"" << dataPath << "\"" << std::endl;
+        return;
+    }
+
     DSString line;
-    int numEdges;
+    int numEdges = 0;
 
     dataFile >> numEdges;
     dataFile.get();
@@ -60,7 +65,17 @@ void FlightPlanner::planFlights(const DSString plansPath, const DSString outputP
     std::ifstream plansFile(plansPath.c_str());
     std::ofstream outputFile(outputPath.c_str());
 
-    int numPlans;
+    if(plansFile.fail()){
+        std::cerr << "Could not open flight plans file \"" << plansPath << "\"" << std::endl;
+        return;
+    }
+
+    if(outputFile.fail()){
+        std::cerr << "Could not open output file \"" << outputPath << "\"" << std::endl;
+        return;
+    }
+
+    int numPlans = 0;
 
     plansFile >> numPlans;
     plansFile.get();
@@ -179,7 +194,7 @@ DSVector<FlightPlanner::Plan> FlightPlanner::fastestFlightPaths(const DSString s
 }
 
 /**
- * @brief writeToFile - outputs the given flight paths to the given file
+ * @brief writePlans - outputs the given flight paths to the given file
  * @param paths - flight paths to output
  * @param filePath - path to the output file
  */

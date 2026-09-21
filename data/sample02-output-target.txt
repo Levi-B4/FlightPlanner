@@ -1,0 +1,10 @@
+Flight 0: A, C (Time)
+Path 0: A -> B -> C. Time: 68 Cost: 924
+Path 1: A -> B -> D -> C. Time: 141 Cost: 758
+Path 2: A -> B -> D -> E -> C. Time: 224 Cost: 702
+
+Flight 1: A, C (Cost)
+Path 0: A -> B -> C. Time: 68 Cost: 924
+Path 1: A -> B -> D -> C. Time: 141 Cost: 758
+Path 2: A -> B -> D -> E -> C. Time: 224 Cost: 702
+

@@ -1,6 +1,8 @@
 #include "catch.hpp"
 #include <type_traits>
 
+#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iostream>
 
@@ -603,10 +605,74 @@ TEST_CASE("Data_Structures_Adjacency_List", "[Adjacency_List][Data_Structures_Te
     }
 }
 
+/*
+ * Flight Planner
+ */
+#include "../flightplanner.h"
 
+static std::string trim(std::string s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char c) {
+                return !std::isspace(c);
+            }).base(),
+            s.end());
+    return s;
+}
 
+bool compareFiles(const DSString& p1, const DSString& p2) {
+    std::ifstream f1(p1.c_str());
+    std::ifstream f2(p2.c_str());
 
+    if (f1.fail() || f2.fail()) {
+        return false;
+    }
 
+    std::string line1, line2;
+    bool has1, has2;
+    while (true) {
+        has1 = static_cast<bool>(std::getline(f1, line1));
+        has2 = static_cast<bool>(std::getline(f2, line2));
+
+        if (!has1 || !has2) {
+            break;
+        }
+
+        if (trim(line1) != trim(line2)) {
+            return false;
+        }
+    }
+
+    return has1 == has2;
+}
+
+TEST_CASE("Flight_Planner_Sample", "[Flight_Planner][Project_Test]"){
+    DSString dataPath = "data/sample01-flight-data.txt";
+    DSString plansPath = "data/sample01-req-flights.txt";
+    DSString outputPath = "data/sample01-output.txt";
+    DSString outputTargetPath = "data/sample01-output-target.txt";
+
+    SECTION("Verify Sample 1"){
+        FlightPlanner flights = FlightPlanner();
+
+        flights.createFlightList(dataPath);
+        flights.planFlights(plansPath, outputPath);
+
+        REQUIRE(compareFiles(outputPath, outputTargetPath));
+    }
+
+    dataPath = "data/sample02-flight-data.txt";
+    plansPath = "data/sample02-req-flights.txt";
+    outputPath = "data/sample02-output.txt";
+    outputTargetPath = "data/sample02-output-target.txt";
+
+    SECTION("Verify Sample 2"){
+        FlightPlanner flights = FlightPlanner();
+
+        flights.createFlightList(dataPath);
+        flights.planFlights(plansPath, outputPath);
+
+        REQUIRE(compareFiles(outputPath, outputTargetPath));
+    }
+}
 
 
 
